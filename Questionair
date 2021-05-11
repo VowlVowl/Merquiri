@@ -1,1 +1,72 @@
-dd
+QNS 1
+
+provider "aws" {
+  region = "us-east-1"
+}
+resource "aws_vpc" "default" {
+  cidr_block = "${var.vpc_cidr}"
+  enable_dns_hostnames = true
+
+  tags {
+    Name = "demo"
+  }
+}
+
+# Public Subnet
+resource "aws_subnet" "public-subnet"{
+  vpc_id = "${aws_vpc.default.id}"
+  cidr_block = "${var.public_subnet_cidr}"
+  availability_zone_id = "us-east-1"
+
+  tags{
+    Name = "Public Subnet"
+  }
+}
+
+# Private Subnet
+
+resource "aws_subnet" "private-subnet" {
+  vpc_id = "${aws_vpc.default.id}"
+  cidr_block = "${var.private_subnet_cidr}"
+  availability_zone_id = "us-east-1"
+
+  tags {
+    Name = "Private Subnet"
+  }
+}
+
+# For Internet Accesssible
+  resource "aws_internet_gateway" "gw" {
+  vpc_id = "${aws_vpc.default.id}"
+    tags {
+      Name = "Internet"
+    }
+}
+
+# Routing Table for Public
+ resource "aws_route_table" "web-public-rt" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  route {
+    cidr_block = "10.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gw.id}"
+  }
+
+  tags {
+    Name = "Public Subnet RT"
+  }
+}
+
+# Routing Table for Private
+ resource "aws_route_table" "web-private-rt" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  route {
+    cidr_block = "10.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gw.id}"
+  }
+
+  tags {
+    Name = "Private Subnet RT"
+  }
+}
