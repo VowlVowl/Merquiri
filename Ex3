@@ -1,0 +1,43 @@
+rovider "aws" {
+  access_key = "${var.access_key}"
+  secret_key = "${var.secret_key}"
+  region = "us-east-1"
+}
+  //Create a Load Balancer
+resource "aws_elb" "balancer" {
+  name               = "demo_lbalancer"
+  availability_zones = ["us-east-1"]
+}
+resource "aws_vpc" "demo" {
+  cidr_block = 10.0.0.0/16
+}
+resource "aws_subnet" "public-subnet" {
+  vpc_id     = aws_vpc.demo.id
+  cidr_block = "10.0.2.0/16"
+}
+  listener {
+    instance_port     = 8000
+    instance_protocol = "ssh"
+    lb_port           = 22
+    lb_protocol       = "ssh"
+  }
+
+  listener {
+    instance_port = 8000
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "https"
+  }
+    // Route Traffic back to EC2
+
+    resource "aws_lb_target_group" "target-traffic" {
+      vpc_id = aws_vpc.demo.id
+      resource "aws_lb_listener" "load-listener" {
+        load_balancer_arn = aws_lb.load-listener.id
+      }
+    }
+    default_action {
+      target_group_arn = aws_lb_target_group.target-traffic.id
+      type = "forward"
+    }
+  
