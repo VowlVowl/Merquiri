@@ -1,0 +1,54 @@
+provider "aws" {
+    access_key = "AKIAV5HHE2FVA5M5YNSJ"
+    secret_key = "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"
+    region = "us-east-1"
+}
+
+resource "aws_vpc" "demo" {
+  cidr_block = 10.0.0.0/16
+}
+
+# Public Subnet
+resource "aws_subnet" "public-subnet"{
+  vpc_id = "${aws_vpc.demo.id}"
+  cidr_block = 10.0.2.0/16
+  availability_zone_id = "us-east-1"
+}
+
+# Private Subnet
+
+resource "aws_subnet" "private-subnet" {
+  vpc_id = "${aws_vpc.demo.id}"
+  cidr_block = 10.0.3.0/16
+  availability_zone_id = "us-east-1"
+}
+
+# For Internet Accesssible
+  resource "aws_internet_gateway" "vpc_gw" {
+  vpc_id = "${aws_vpc.demo.id}"
+}
+
+# Routing Table for Public
+ resource "aws_route_table" "public_rt" {
+  vpc_id = "${aws_vpc.demo.id}"
+
+  route {
+    cidr_block = "10.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gw.id}"
+  }
+}
+
+# Routing Table for Private
+ resource "aws_route_table" "private_rt" {
+  vpc_id = "${aws_vpc.demo.id}"
+
+  route {
+    cidr_block = "10.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.vpc_gw.id}"
+  }
+}
+
+resource "aws_route_table_association" "public_rt" {
+    subnet_id = aws_subnet.public-subnet.id
+    route_table_id = aws_route_table.public_rt.id
+}
