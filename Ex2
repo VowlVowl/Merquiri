@@ -1,0 +1,73 @@
+provider "aws" {
+    access_key = "${var.access_key}"
+    secret_key = "${var.secret_key}"
+    region = "us-east-1"
+}
+// Create a EC2 Instance with ubuntu ami
+resource "aws_instance" "EC2_demo" {
+  ami           = "ami-0ee02acd56a52998e"
+  instance_type = "t2.micro"
+}
+resource "aws_vpc" "demo" {
+  cidr_block = 10.0.0.0/16
+}
+// with Private Subnet
+resource "aws_subnet" "private-subnet" {
+  vpc_id     = aws_vpc.demo.id
+  cidr_block = "10.0.2.0/16"
+
+}
+
+  resource "aws_security_group" "ubuntu" {
+    name = "security-ubuntu"
+    description = " Allow SSH anywhere"
+
+    ingress {
+      description = "SSH"
+      from_port = 22
+      to_port = 22
+      protocol = "tcp"
+      cidr_blocks = [
+        "0.0.0.0/0"]
+    }
+
+    ingress {
+      description = "HTTP"
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = [
+        "18.189.0.0/16"]
+    }
+    ingress {
+      description = "HTTP"
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = [
+        "18.189.0.0/16"]
+    }
+    ingress {
+      description = "HTTP"
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = [
+        "116.206.0.0/16"]
+    }
+    ingress {
+      description = "HTTP"
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = [
+        "223.25.0.0/16"]
+    }
+    egress {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = [
+        "0.0.0.0/0"]
+    }
+  }
