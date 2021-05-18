@@ -1,0 +1,28 @@
+provider "aws" {
+  access_key = "var.access_key"
+  secret_key = "var.secret_key"
+  region = "us-east-1"
+}
+
+resource "aws_instance" "EC2_demo" {
+  ami           = "ami-0ee02acd56a52998e"
+  instance_type = "t2.micro"
+}
+resource "aws_vpc" "demo" {
+  cidr_block = 10.0.0.0/16
+}
+
+provider "docker" {
+}
+
+resource "docker_image" "nginx"{
+  name      = "nginx:1.18-alpine"
+  keep_locally = true
+}
+resource "docker_container" "nginx-server" {
+  image = "docker"
+  name = "nginx-server"
+  ports {
+    internal = 80
+  }
+}
